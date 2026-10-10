@@ -11,11 +11,17 @@ jobs:
           wget -q https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
           unzip -q android-ndk-r25c-linux.zip
           echo "NDK=$PWD/android-ndk-r25c" >> $GITHUB_ENV
+      - name: Locate jni
+        run: |
+          ls -R
+          MK=$(find . -path ./android-ndk-r25c -prune -o -name "Android.mk" -print | head -1)
+          echo "Found mk: $MK"
+          PROJ=$(dirname $(dirname $MK))
+          echo "PROJ=$PROJ" >> $GITHUB_ENV
       - name: ndk-build
-        run: $NDK/ndk-build NDK_PROJECT_PATH=. NDK_APPLICATION_MK=jni/Application.mk APP_BUILD_SCRIPT=jni/Android.mk
+        run: $NDK/ndk-build NDK_PROJECT_PATH=$PROJ
       - name: Upload libs
         uses: actions/upload-artifact@v4
         with:
           name: libs
           path: libs/
-          
